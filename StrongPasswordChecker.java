@@ -3,12 +3,10 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.LinkedList;
 
-// Interface for Hash Functions
 interface HashFunctionInterface {
     int computeHash(String key);
 }
 
-// Hash Function 1: Early Java hashCode implementation
 class HashFunction1 implements HashFunctionInterface {
     public int computeHash(String key) {
         int hash = 0;
@@ -20,7 +18,6 @@ class HashFunction1 implements HashFunctionInterface {
     }
 }
 
-// Hash Function 2: Current Java hashCode implementation
 class HashFunction2 implements HashFunctionInterface {
     public int computeHash(String key) {
         int hash = 0;
@@ -31,7 +28,6 @@ class HashFunction2 implements HashFunctionInterface {
     }
 }
 
-// Class to hold search results
 class SearchResult {
     boolean found;
     int comparisons;
@@ -42,7 +38,6 @@ class SearchResult {
     }
 }
 
-// Separate Chaining Hash Table
 class SeparateChainingHashTable {
     private int M;
     private LinkedList<Entry>[] table;
@@ -51,7 +46,6 @@ class SeparateChainingHashTable {
     public SeparateChainingHashTable(int size, HashFunctionInterface hashFunction) {
         this.M = size;
         this.hashFunction = hashFunction;
-        // Suppressing unchecked warning for generic array creation
         @SuppressWarnings("unchecked")
         LinkedList<Entry>[] tempTable = new LinkedList[M];
         table = tempTable;
@@ -60,7 +54,6 @@ class SeparateChainingHashTable {
         }
     }
 
-    // Entry class to store key and value
     class Entry {
         String key;
         int value;
@@ -71,12 +64,10 @@ class SeparateChainingHashTable {
         }
     }
 
-    // Insert key with value into the hash table
     public void insert(String key, int value) {
         int hash = Math.abs(hashFunction.computeHash(key)) % M;
         for (Entry entry : table[hash]) {
             if (entry.key.equals(key)) {
-                // Update value if key already exists
                 entry.value = value;
                 return;
             }
@@ -84,7 +75,6 @@ class SeparateChainingHashTable {
         table[hash].add(new Entry(key, value));
     }
 
-    // Search for a key and return the number of comparisons
     public SearchResult search(String key) {
         int hash = Math.abs(hashFunction.computeHash(key)) % M;
         int comparisons = 0;
@@ -98,7 +88,6 @@ class SeparateChainingHashTable {
     }
 }
 
-// Linear Probing Hash Table
 class LinearProbingHashTable {
     private int M;
     private Entry[] table;
@@ -110,7 +99,6 @@ class LinearProbingHashTable {
         table = new Entry[M];
     }
 
-    // Entry class to store key and value
     class Entry {
         String key;
         int value;
@@ -121,12 +109,10 @@ class LinearProbingHashTable {
         }
     }
 
-    // Insert key with value into the hash table using linear probing
     public void insert(String key, int value) {
         int hash = Math.abs(hashFunction.computeHash(key)) % M;
         while (table[hash] != null) {
             if (table[hash].key.equals(key)) {
-                // Update value if key already exists
                 table[hash].value = value;
                 return;
             }
@@ -135,25 +121,21 @@ class LinearProbingHashTable {
         table[hash] = new Entry(key, value);
     }
 
-    // Search for a key and return the number of comparisons
     public SearchResult search(String key) {
         int hash = Math.abs(hashFunction.computeHash(key)) % M;
         int comparisons = 0;
-        int startHash = hash; // To detect if we've looped around
+        int startHash = hash; 
 
         while (true) {
             comparisons++;
             if (table[hash] == null) {
-                // Key not found
                 return new SearchResult(false, comparisons);
             }
             if (table[hash].key.equals(key)) {
-                // Key found
                 return new SearchResult(true, comparisons);
             }
             hash = (hash + 1) % M;
             if (hash == startHash) {
-                // Searched the entire table
                 return new SearchResult(false, comparisons);
             }
         }
@@ -161,24 +143,20 @@ class LinearProbingHashTable {
 }
 
 public class StrongPasswordChecker {
-    // URLs and constants
     private static final String DICTIONARY_URL = "https://www.mit.edu/~ecprice/wordlist.10000";
     private static final int SEPARATE_CHAINING_SIZE = 1000;
     private static final int LINEAR_PROBING_SIZE = 20000;
 
     public static void main(String[] args) {
         try {
-            // Initialize hash functions
             HashFunctionInterface hashFunc1 = new HashFunction1();
             HashFunctionInterface hashFunc2 = new HashFunction2();
 
-            // Initialize hash tables
             SeparateChainingHashTable scHash1 = new SeparateChainingHashTable(SEPARATE_CHAINING_SIZE, hashFunc1);
             SeparateChainingHashTable scHash2 = new SeparateChainingHashTable(SEPARATE_CHAINING_SIZE, hashFunc2);
             LinearProbingHashTable lpHash1 = new LinearProbingHashTable(LINEAR_PROBING_SIZE, hashFunc1);
             LinearProbingHashTable lpHash2 = new LinearProbingHashTable(LINEAR_PROBING_SIZE, hashFunc2);
 
-            // Load dictionary from URL
             System.out.println("Loading dictionary...");
             URL url = new URL(DICTIONARY_URL);
             BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -197,7 +175,6 @@ public class StrongPasswordChecker {
             br.close();
             System.out.println("Dictionary loaded with " + (lineNumber - 1) + " words.\n");
 
-            // Define test passwords
             String[] testPasswords = {
                 "account8",
                 "accountability",
@@ -232,7 +209,6 @@ public class StrongPasswordChecker {
         }
     }
 
-    // Method to check if a password is strong
     private static boolean checkStrongPassword(String password,
                                                SeparateChainingHashTable scHash1,
                                                SeparateChainingHashTable scHash2,
@@ -240,50 +216,40 @@ public class StrongPasswordChecker {
                                                LinearProbingHashTable lpHash2) {
         boolean isStrong = true;
 
-        // (i) Check length
         if (password.length() < 8) {
             System.out.println("Password length is less than 8 characters.");
             isStrong = false;
         }
 
-        // Prepare variations for checks
         String lowerPassword = password.toLowerCase();
         String passwordBaseDigit = null;
 
-        // Check if password ends with a digit
         if (Character.isDigit(password.charAt(password.length() - 1))) {
             passwordBaseDigit = lowerPassword.substring(0, lowerPassword.length() - 1);
         }
 
-        // (ii) Check if it's a word in the dictionary using all hash tables and hash functions
 
-        // Separate Chaining with Hash Function 1
         SearchResult scHash1Result = scHash1.search(lowerPassword);
         boolean foundInScHash1 = scHash1Result.found;
         int comparisonsScHash1 = scHash1Result.comparisons;
 
-        // Separate Chaining with Hash Function 2
         SearchResult scHash2Result = scHash2.search(lowerPassword);
         boolean foundInScHash2 = scHash2Result.found;
         int comparisonsScHash2 = scHash2Result.comparisons;
 
-        // Linear Probing with Hash Function 1
         SearchResult lpHash1Result = lpHash1.search(lowerPassword);
         boolean foundInLpHash1 = lpHash1Result.found;
         int comparisonsLpHash1 = lpHash1Result.comparisons;
 
-        // Linear Probing with Hash Function 2
         SearchResult lpHash2Result = lpHash2.search(lowerPassword);
         boolean foundInLpHash2 = lpHash2Result.found;
         int comparisonsLpHash2 = lpHash2Result.comparisons;
 
-        // If the password is found in any of the hash tables, it's not strong
         if (foundInScHash1 || foundInScHash2 || foundInLpHash1 || foundInLpHash2) {
             System.out.println("Password is a dictionary word.");
             isStrong = false;
         }
 
-        // (iii) Check if it's a word followed by a digit
         if (passwordBaseDigit != null) {
             // Separate Chaining with Hash Function 1
             SearchResult scHash1DigitResult = scHash1.search(passwordBaseDigit);
@@ -311,7 +277,6 @@ public class StrongPasswordChecker {
                 isStrong = false;
             }
 
-            // Display additional comparison costs for "Digit Base"
             System.out.println("Additional Search Costs for Digit Base:");
             System.out.println("Separate Chaining with Hash Function 1 (Digit Base): " + comparisonsDigitScHash1 + " comparisons");
             System.out.println("Separate Chaining with Hash Function 2 (Digit Base): " + comparisonsDigitScHash2 + " comparisons");
@@ -319,7 +284,6 @@ public class StrongPasswordChecker {
             System.out.println("Linear Probing with Hash Function 2 (Digit Base): " + comparisonsDigitLpHash2 + " comparisons");
         }
 
-        // Display comparison costs for the main password
         System.out.println("Search Costs:");
         System.out.println("Separate Chaining with Hash Function 1: " + comparisonsScHash1 + " comparisons");
         System.out.println("Separate Chaining with Hash Function 2: " + comparisonsScHash2 + " comparisons");
